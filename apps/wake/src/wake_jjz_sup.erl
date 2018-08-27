@@ -3,7 +3,7 @@
 %% @end
 %%%-------------------------------------------------------------------
 
--module(wake_sup).
+-module(wake_jjz_sup).
 
 -behaviour(supervisor).
 
@@ -31,9 +31,8 @@ start_link() ->
 %% Before OTP 18 tuples must be used to specify a child. e.g.
 %% Child :: {Id,StartFunc,Restart,Shutdown,Type,Modules}
 init([]) ->
-	WakeJJZSup = {wake_jjz_sup,{wake_jjz_sup, start_link, []}, permanent,5000,supervisor, [wake_jjz_sup]},
-	WakeLoad = {wake_load,{wake_load, start_link, []}, permanent, 5000, worker, [wake_load]},
-    {ok, { {one_for_all, 0, 1}, [WakeJJZSup, WakeLoad]} }.
+	WakeJJZ = {wake_jjz,{wake_jjz, start_link, []}, permanent, 5000, worker, [wake_jjz]},
+    {ok, { {simple_one_for_one, 5, 10}, [WakeJJZ]} }.
 
 %%====================================================================
 %% Internal functions
