@@ -28,7 +28,7 @@
 %% ------------------------------------------------------------------
 
 start_link(Car, Time) ->
-    gen_server:start_link({local, ?SERVER}, ?MODULE, [Car, Time], []).
+    gen_server:start_link(?MODULE, [Car, Time], []).
 
 %% ------------------------------------------------------------------
 %% gen_server Function Definitions
