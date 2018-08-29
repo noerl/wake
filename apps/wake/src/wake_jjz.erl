@@ -6,7 +6,7 @@
 %% API Function Exports
 %% ------------------------------------------------------------------
 
--export([start_link/2]).
+-export([start_link/2, req/3]).
 
 -record(state, {
     car,
@@ -74,7 +74,7 @@ calc_time(NeedDay, SecondList) ->
     CurDay = calendar:day_of_the_week(date()),
     NextTime = last_time(SecondList),
     LastSec = (NeedDay - CurDay) * 86400 + NextTime,
-    io:format("lasttime:~p~n", [LastSec]),
+    io:format("Pid:~p LastSec:~p~n", [self(), LastSec]),
     if  LastSec > 30 ->
             erlang:send_after(30000, self(), calc);
         LastSec > 0 ->
@@ -108,12 +108,13 @@ req(#state{car = Car, day = Day, phone = PhoneList}) ->
 req(Car, Day, PhoneList) ->
     PhoneString = phone_append(Day, PhoneList),
     Url = "http://sdk2.entinfo.cn/webservice.asmx/SendSMS",
-	Body = io_lib:format(<<"sn=SDK-HBY-010-00003&pwd=310348&mobile=~p&content=【京华旺】尊敬的车牌号为:**~s提醒您,请您务必今天办理进京证!进京证!!"/utf8>>, [PhoneString, Car]),
+	Body = list_to_binary(io_lib:format(<<"sn=SDK-HBY-010-00003&pwd=310348&mobile=~s&content=【京华旺】尊敬的车牌号为:**~s 你好,请您务必今天办理进京证!进京证!!"/utf8>>, [PhoneString, Car])),
+	io:format("Req:~p,~ts~n", [Url, Body]),
 	case httpc:request(post, {Url, [], "application/x-www-form-urlencoded; charset=utf-8", Body}, [], []) of
         {ok,{{"HTTP/1.1",200,"OK"}, _, RespBody}} ->
-            io:format("Resp:~ts~n", [list_to_binary(RespBody)]);
+            io:format("Pid:~p, Resp:~ts~n", [self(), list_to_binary(RespBody)]);
         Error ->
-            io:format("Error:~p~n", [Error])
+            io:format("Pid:~p, Error:~p~n", [self(), Error])
     end.
 
 
