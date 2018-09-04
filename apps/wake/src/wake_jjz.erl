@@ -72,8 +72,7 @@ calc_time(#state{day = Day, second = SecondList}) ->
 calc_time(_NeedDay, []) -> undefined;
 calc_time(NeedDay, SecondList) ->
     CurDay = calendar:day_of_the_week(date()),
-    NextTime = last_time(SecondList),
-    LastSec = (NeedDay - CurDay) * 86400 + NextTime,
+    LastSec = last_time(NeedDay - CurDay, SecondList),
     io:format("Pid:~p LastSec:~p~n", [self(), LastSec]),
     if  LastSec > 30 ->
             erlang:send_after(30000, self(), calc);
@@ -84,14 +83,17 @@ calc_time(NeedDay, SecondList) ->
     end.
 
 
-last_time(SecondList) ->
+last_time(LastDay, [Second|_List]) when LastDay > 0 ->
+    CurTime = calendar:time_to_seconds(time()),
+    LastDay * 86400 + Second - CurTime;
+last_time(LastDay, SecondList) ->
     CurTime = calendar:time_to_seconds(time()),
     NextTime = 
         case next_time(CurTime, SecondList) of
             [] -> lists:nth(1, SecondList);
             NextSecond -> NextSecond
         end,
-    NextTime - CurTime.
+   LastDay * 86400 + NextTime - CurTime.
 
 
 
