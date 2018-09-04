@@ -71,8 +71,10 @@ calc_time(#state{day = Day, second = SecondList}) ->
 %% calendar:datetime_to_gregorian_seconds({{1970,1,1},{8,0,0}}) = 62167248000
 calc_time(_NeedDay, []) -> undefined;
 calc_time(NeedDay, SecondList) ->
-    CurDay = calendar:day_of_the_week(date()),
-    LastSec = last_time(NeedDay - CurDay, SecondList),
+    {Date, Time} = calendar:local_time(),
+    CurDay = calendar:day_of_the_week(Date),
+    CurTime = calendar:time_to_seconds(Time),
+    LastSec = last_time(NeedDay - CurDay, CurTime, SecondList),
     io:format("Pid:~p LastSec:~p~n", [self(), LastSec]),
     if  LastSec > 30 ->
             erlang:send_after(30000, self(), calc);
@@ -83,17 +85,16 @@ calc_time(NeedDay, SecondList) ->
     end.
 
 
-last_time(LastDay, [Second|_List]) when LastDay > 0 ->
-    CurTime = calendar:time_to_seconds(time()),
+last_time(LastDay, CurTime, [Second|_List]) when LastDay < 0 ->
+    LastDay * (-86400) + Second - CurTime;
+last_time(LastDay, CurTime, [Second|_List]) when LastDay > 0 ->
     LastDay * 86400 + Second - CurTime;
-last_time(LastDay, SecondList) ->
-    CurTime = calendar:time_to_seconds(time()),
-    NextTime = 
-        case next_time(CurTime, SecondList) of
-            [] -> lists:nth(1, SecondList);
-            NextSecond -> NextSecond
-        end,
-   LastDay * 86400 + NextTime - CurTime.
+last_time(0, CurTime, SecondList) ->
+    case next_time(CurTime, SecondList) of
+        [] -> 7 * 86400 + hd(SecondList) - CurTime;
+        NextSecond -> NextSecond - CurTime
+    end.
+   
 
 
 
