@@ -86,7 +86,7 @@ calc_time(NeedDay, SecondList) ->
 
 
 last_time(LastDay, CurTime, [Second|_List]) when LastDay < 0 ->
-    LastDay * (-86400) + Second - CurTime;
+     (7 + LastDay) * 86400 + Second - CurTime;
 last_time(LastDay, CurTime, [Second|_List]) when LastDay > 0 ->
     LastDay * 86400 + Second - CurTime;
 last_time(0, CurTime, SecondList) ->
@@ -111,7 +111,7 @@ req(#state{car = Car, day = Day, phone = PhoneList}) ->
 req(Car, Day, PhoneList) ->
     PhoneString = phone_append(Day, PhoneList),
     Url = "http://sdk2.entinfo.cn/webservice.asmx/SendSMS",
-	Body = list_to_binary(io_lib:format(<<"sn=SDK-HBY-010-00003&pwd=310348&mobile=~s&content=【京华旺】尊敬的车牌号为:**~s 你好,请您务必今天办理进京证!进京证!!"/utf8>>, [PhoneString, Car])),
+	Body = list_to_binary(io_lib:format(base64:decode(<<"c249U0RLLUhCWS0wMTAtMDAwMDMmcHdkPTMxMDM0OCZtb2JpbGU9fnMmY29udGVudD3jgJDkuqzljY7ml7rjgJHlsIrmlaznmoTovabniYzlj7fkuLo6Kip+cyDkvaDlpb0s6K+35oKo5Yqh5b+F5LuK5aSp5Yqe55CG6L+b5Lqs6K+BIei/m+S6rOivgSEh">>), [PhoneString, Car])),
 	io:format("Req:~p,~ts~n", [Url, Body]),
 	case httpc:request(post, {Url, [], "application/x-www-form-urlencoded; charset=utf-8", Body}, [], []) of
         {ok,{{"HTTP/1.1",200,"OK"}, _, RespBody}} ->
