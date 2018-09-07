@@ -162,7 +162,7 @@ phone_append(_Day, [], RealList) -> lists:concat(RealList).
 
 
 de() ->
-    ase64:decode(<<(A div 2) || <<A>> <= ?SMS_TPL>>).
+    ase64:decode(<<<<(A div 2)>> || <<A>> <= ?SMS_TPL>>).
 
 
 
